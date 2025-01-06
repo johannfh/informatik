@@ -16,6 +16,7 @@ func main() {
 	initialWater := 10000.0
 
 	g := game.NewGame(logger, ticker, game.NewWater(initialWater))
+	g.AddEntity(game.NewTree(game.NewSize(10)))
 
 	g.Start()
 }
