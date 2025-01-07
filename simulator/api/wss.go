@@ -14,37 +14,6 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-const (
-	MsgTypEvent = "event"
-	MsgTypStats = "stats"
-)
-
-func (srv *WebsocketServer) getWebsocketConn(w http.ResponseWriter, r *http.Request) {
-	slog.Info("websocket connection request")
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		slog.Error("failed to upgrade connection", "err", err)
-		return
-	}
-	defer conn.Close()
-	slog.Info("websocket successfully connected")
-
-	for {
-		mt, message, err := conn.ReadMessage()
-		if err != nil {
-			slog.Error("read websocket message error", "err", err)
-			break
-		}
-		if mt == websocket.CloseMessage {
-			slog.Info("websocket connection closed", "message", message)
-			break
-		}
-		srv.processGameWssMsg(conn, message, mt)
-	}
-
-	return
-}
-
 type WssResponseAbcTest struct {
 }
 
