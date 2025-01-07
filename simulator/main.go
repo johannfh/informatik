@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -17,16 +18,19 @@ func main() {
 	ctx := context.Background()
 
 	ticker := time.NewTicker(500 * time.Millisecond)
-	initialWater := 10000.0
+	initialWater := 10.0
 
-	g := game.NewGame(logger, ticker, game.NewWater(initialWater))
+	g := game.NewGame(logger, ticker, initialWater)
 	g.AddEntity(game.NewTree(game.NewSize(10)))
 	g.AddEntity(game.NewWolf(20))
 
 	go g.Start(ctx)
 
 	addr := ":8080"
-	go http.ListenAndServe(addr, api.Server{}.CreateRouter("/"))
+	go log.Fatal(http.ListenAndServe(addr, api.ApiServer{
+		Context: ctx,
+		Game:    g,
+	}.CreateRouter("/")))
 
 	<-ctx.Done()
 }

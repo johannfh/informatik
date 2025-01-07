@@ -42,7 +42,7 @@ func (t *Tree) Tick(g *Game, deltatime time.Duration) error {
 	return nil
 }
 
-func (t *Tree) getWaterCons(deltatime time.Duration) Water {
+func (t *Tree) getWaterCons(deltatime time.Duration) float64 {
 	// base consume
 	consume := t.Height.Meters()
 
@@ -50,7 +50,7 @@ func (t *Tree) getWaterCons(deltatime time.Duration) Water {
 	timeframe := deltatime.Seconds() / 5
 
 	// water consume: consume / timeframe
-	return NewWater(consume * timeframe)
+	return consume * timeframe
 }
 
 type Flower struct {
@@ -79,7 +79,7 @@ func (f *Flower) Tick(g *Game, deltatime time.Duration) error {
 	return nil
 }
 
-func (f *Flower) getWaterCons(deltatime time.Duration) Water {
+func (f *Flower) getWaterCons(deltatime time.Duration) float64 {
 	// base consume
 	consume := f.Height.Meters()
 
@@ -87,5 +87,5 @@ func (f *Flower) getWaterCons(deltatime time.Duration) Water {
 	timeframe := deltatime.Seconds() / 2
 
 	// water consume: consume / timeframe
-	return NewWater(consume * timeframe)
+	return consume * timeframe
 }

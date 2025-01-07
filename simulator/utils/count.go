@@ -18,7 +18,13 @@ type CountNode struct {
 	Label string `json:"label"`
 	Count int    `json:"count"`
 
-	SubNodes []*CountNode `json:"subNodes,omitempty"`
+	SubNodes []*CountNode `json:"subNodes"`
+}
+
+func (cMap CountMap) CreateTree(label string) *CountNode {
+	cn := &CountNode{Label: label}
+	cn.ExtractFromCountMap(cMap)
+	return cn
 }
 
 func (ecn *CountNode) Append(namespace []string, count int) {
