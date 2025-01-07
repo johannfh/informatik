@@ -17,7 +17,7 @@ func main() {
 	slog.SetDefault(logger)
 	ctx := context.Background()
 
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(time.Second)
 	initialWater := 10.0
 
 	g := game.NewGame(logger, ticker, initialWater)
