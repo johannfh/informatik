@@ -18,9 +18,9 @@ func NewTree(height Size) *Tree {
 }
 
 type Tree struct {
-	ID int
+	ID int `json:"id"`
 
-	Height Size
+	Height Size `json:"height"`
 }
 
 func (t *Tree) GetID() int {
@@ -32,10 +32,10 @@ func (t *Tree) SetID(id int) {
 
 func (t *Tree) Tick(g *Game, deltatime time.Duration) error {
 	waterCons := t.getWaterCons(deltatime)
-	g.Water -= waterCons
+	g.water -= waterCons
 
-	if g.Water < 0 {
-		g.Water = 0
+	if g.water < 0 {
+		g.water = 0
 		return ErrPlantDriedUp
 	}
 
@@ -48,6 +48,43 @@ func (t *Tree) getWaterCons(deltatime time.Duration) Water {
 
 	// timeframe for one full consume (five seconds)
 	timeframe := deltatime.Seconds() / 5
+
+	// water consume: consume / timeframe
+	return NewWater(consume * timeframe)
+}
+
+type Flower struct {
+	ID int `json:"id"`
+
+	Height Size   `json:"height"`
+	Color  string `json:"color"`
+}
+
+func (f *Flower) GetID() int {
+	return f.ID
+}
+func (f *Flower) SetID(id int) {
+	f.ID = id
+}
+
+func (f *Flower) Tick(g *Game, deltatime time.Duration) error {
+	waterCons := f.getWaterCons(deltatime)
+
+	g.water -= waterCons
+	if g.water < 0 {
+		g.water = 0
+		return ErrPlantDriedUp
+	}
+
+	return nil
+}
+
+func (f *Flower) getWaterCons(deltatime time.Duration) Water {
+	// base consume
+	consume := f.Height.Meters()
+
+	// timeframe for one full consume (two seconds)
+	timeframe := deltatime.Seconds() / 2
 
 	// water consume: consume / timeframe
 	return NewWater(consume * timeframe)
