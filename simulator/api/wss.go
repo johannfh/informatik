@@ -19,7 +19,7 @@ const (
 	MsgTypStats = "stats"
 )
 
-func (srv *ApiServer) getGameWebsocketConn(w http.ResponseWriter, r *http.Request) {
+func (srv *WebsocketServer) getWebsocketConn(w http.ResponseWriter, r *http.Request) {
 	slog.Info("websocket connection request")
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -48,7 +48,7 @@ func (srv *ApiServer) getGameWebsocketConn(w http.ResponseWriter, r *http.Reques
 type WssResponseAbcTest struct {
 }
 
-func (srv *ApiServer) processGameWssMsg(conn *websocket.Conn, message []byte, mt int) error {
+func (srv *WebsocketServer) processGameWssMsg(conn *websocket.Conn, message []byte, mt int) error {
 	var err error
 	var response any
 	defer func() {

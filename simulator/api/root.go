@@ -8,28 +8,18 @@ import (
 	"github.com/johannfh/informatik/simulator/game"
 )
 
-type ApiServer struct {
+type WebsocketServer struct {
 	Context context.Context
 	Game    *game.Game
 }
 
-func (srv ApiServer) CreateRouter(prefix string) chi.Router {
-	assert.NotEmpty(prefix, "empty prefix")
-
-	assert.NotNil(srv.Context, "missing Context in ApiServer")
-	assert.NotNil(srv.Game, "missing *Game in ApiServer")
+func (srv WebsocketServer) CreateRouter() chi.Router {
+	assert.NotNil(srv.Context, "missing Context in WebsocketServer")
+	assert.NotNil(srv.Game, "missing *Game in WebsocketServer")
 
 	r := chi.NewRouter()
 
-	gr := GameController{
-		Context: srv.Context,
-		Game:    srv.Game,
-	}.CreateRouter()
+	r.Get("/", srv.getWebsocketConn)
 
-	r.Mount("/game", gr)
-	r.Get("/wss", srv.getGameWebsocketConn)
-
-	prefixedRouter := chi.NewRouter()
-	prefixedRouter.Mount(prefix, r)
 	return r
 }

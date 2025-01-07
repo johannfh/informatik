@@ -27,10 +27,10 @@ func main() {
 	go g.Start(ctx)
 
 	addr := ":8080"
-	go log.Fatal(http.ListenAndServe(addr, api.ApiServer{
+	go log.Fatal(http.ListenAndServe(addr, api.WebsocketServer{
 		Context: ctx,
 		Game:    g,
-	}.CreateRouter("/")))
+	}.CreateRouter()))
 
 	<-ctx.Done()
 }
