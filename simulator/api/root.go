@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/johannfh/go-utils/assert"
@@ -28,9 +27,7 @@ func (srv ApiServer) CreateRouter(prefix string) chi.Router {
 	}.CreateRouter()
 
 	r.Mount("/game", gr)
-	r.Get("/hi", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hi!"))
-	})
+	r.Get("/wss", srv.getGameWebsocketConn)
 
 	prefixedRouter := chi.NewRouter()
 	prefixedRouter.Mount(prefix, r)

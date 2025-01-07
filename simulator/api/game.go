@@ -22,26 +22,26 @@ func (gc GameController) CreateRouter() chi.Router {
 
 	r := chi.NewRouter()
 
-	r.Post("/water/change-by", gc.handleAddWater)
-	r.Get("/water/current", gc.handleGetWater)
+	r.Post("/water/change-by", Make(gc.handleAddWater))
+	r.Get("/water/current", Make(gc.handleGetWater))
 
 	return r
 }
 
-func (gc *GameController) handleAddWater(w http.ResponseWriter, r *http.Request) {
+func (gc *GameController) handleAddWater(w http.ResponseWriter, r *http.Request) error {
 	amountParam := r.URL.Query().Get("amount")
 
 	if amountParam == "" {
-		w.Write([]byte("Missing 'amount' parameter!"))
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return InvalidRequestData(map[string]string{
+			"amount": "missing parameter (float)",
+		})
 	}
 
 	amount, err := strconv.ParseFloat(amountParam, 64)
 	if err != nil {
-		w.Write([]byte("Invalid 'amount' parameter!"))
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return InvalidRequestData(map[string]string{
+			"amount": "invalid format (float)",
+		})
 	}
 
 	oldAmount := gc.Game.GetWater()
@@ -49,9 +49,18 @@ func (gc *GameController) handleAddWater(w http.ResponseWriter, r *http.Request)
 	gc.Game.SetWater(gc.Game.GetWater() + amount)
 
 	w.Write([]byte(fmt.Sprintf("Changed water by %f! Water is now at %f", gc.Game.GetWater()-oldAmount, gc.Game.GetWater())))
-	w.WriteHeader(http.StatusOK)
+	return nil
 }
-func (gc *GameController) handleGetWater(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(fmt.Sprintf("Water currently at %f!", gc.Game.GetWater())))
-	w.WriteHeader(http.StatusOK)
+
+type getWaterResponse struct {
+	StatusCode int `json:"statusCode"`
+	Data       int `json:"water"`
+}
+
+func (gc *GameController) handleGetWater(w http.ResponseWriter, r *http.Request) error {
+	res := getWaterResponse{
+		StatusCode: http.StatusOK,
+		Data:       int(gc.Game.GetWater()),
+	}
+	return writeJSON(w, http.StatusOK, res)
 }

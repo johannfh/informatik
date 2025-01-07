@@ -4,7 +4,8 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main | jq"
+  # filter out "tick calculated" logs
+  bin = "./tmp/main | jq 'select(.msg != \"tick calculated\")'"
   cmd = "go build -o ./tmp/main ."
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
