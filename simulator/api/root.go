@@ -11,6 +11,12 @@ import (
 	"github.com/johannfh/informatik/simulator/game"
 )
 
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
 type WebsocketServer struct {
 	Context context.Context
 	Game    *game.Game
@@ -28,42 +34,7 @@ func (srv WebsocketServer) CreateRouter() chi.Router {
 }
 
 type BasicMessage struct {
-	MsgTyp string `json:"messageType"`
-}
-
-// All messages from the server start with 'server.'
-// All messages from the client start with 'client.'
-const (
-	// like 'a plan just died'
-	MsgTypServerEvent = "server.event"
-	// like '{"entities": 10, ...}'
-	MsgTypServerStats = "server.stats"
-
-	// restarts the game
-	MsgTypClientRestartGame = "client.restartGame"
-	// changes the water level in the game
-	MsgTypClientUpdateWater = "client.updateWater"
-)
-
-// Contains every valid websocket message type
-// together with their owner/user (client/server)
-var MsgTypes = map[string]string{
-	// server sent events
-	MsgTypServerEvent: "server",
-	MsgTypServerStats: "server",
-
-	// client sent events
-	MsgTypClientRestartGame: "client",
-	MsgTypClientUpdateWater: "client",
-}
-
-func IsValidMsgTyp(msgTyp string) bool {
-	for _, v := range MsgTypes {
-		if v == msgTyp {
-			return true
-		}
-	}
-	return false
+	MsgKind string `json:"msgKind"`
 }
 
 func (srv *WebsocketServer) getWebsocketConn(w http.ResponseWriter, r *http.Request) {
@@ -76,18 +47,10 @@ func (srv *WebsocketServer) getWebsocketConn(w http.ResponseWriter, r *http.Requ
 	defer conn.Close()
 	slog.Info("websocket successfully connected")
 
-	for {
-		mt, message, err := conn.ReadMessage()
-		if err != nil {
-			slog.Error("read websocket message error", "err", err)
-			break
-		}
-		if mt == websocket.CloseMessage {
-			slog.Info("websocket connection closed", "message", message)
-			break
-		}
-		srv.processGameWssMsg(conn, message, mt)
-	}
+	alive := true
+	stop := func() { alive = false }
 
-	return
+	for alive {
+		srv.handleConn(conn, stop)
+	}
 }
