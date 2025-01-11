@@ -138,6 +138,7 @@ func serveWs(ctx context.Context, hub *Hub, w http.ResponseWriter, r *http.Reque
 		logger.Error("failed to upgrade connection to websocket protocol", "err", err)
 		return
 	}
+
 	client := &Client{
 		hub:     hub,
 		conn:    conn,
