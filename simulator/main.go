@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/johannfh/informatik/simulator/api"
 	"github.com/johannfh/informatik/simulator/game"
 )
 
@@ -13,7 +14,10 @@ func main() {
 	slog.SetDefault(logger)
 
 	game := game.NewGame()
-
 	ticker := time.NewTicker(time.Second)
-	game.Start(ticker)
+	// Game is running in the background
+	go game.Start(ticker)
+
+	srv := api.NewServer()
+	srv.ListenAndServe(":8080")
 }
