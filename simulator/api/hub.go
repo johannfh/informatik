@@ -1,5 +1,7 @@
 package api
 
+import "context"
+
 type Hub struct {
 	clients map[*Client]bool
 
@@ -7,9 +9,11 @@ type Hub struct {
 
 	register   chan *Client
 	unregister chan *Client
+
+	context context.Context
 }
 
-func NewHub() *Hub {
+func NewHub(ctx context.Context) *Hub {
 	return &Hub{
 		clients: make(map[*Client]bool),
 
@@ -17,6 +21,8 @@ func NewHub() *Hub {
 
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
+
+		context: ctx,
 	}
 }
 

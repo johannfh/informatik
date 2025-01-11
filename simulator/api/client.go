@@ -2,12 +2,13 @@ package api
 
 import (
 	"bytes"
-	"log"
+	"context"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/johannfh/informatik/simulator/utils"
 )
 
 const (
@@ -27,6 +28,12 @@ const (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+
+	// Allow all origins
+	CheckOrigin: func(r *http.Request) bool {
+		// TODO: implement proper checking in respective environments
+		return true
+	},
 }
 
 // Client is the middleman between the websocket connection and the hub
@@ -39,6 +46,10 @@ type Client struct {
 
 	// Buffered channel for outbound messages
 	send chan []byte
+
+	context context.Context
+
+	logger *slog.Logger
 }
 
 var (
@@ -68,11 +79,13 @@ func (c *Client) readPump() {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				slog.Error("unexpected websocket close error", "err", err)
+				c.logger.Error("unexpected websocket close error", "err", err)
 			}
 			return
 		}
+		c.logger.Info("new message")
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		c.logger.Info("received message from websocket connection", "message", string(message))
 	}
 }
 
@@ -118,14 +131,22 @@ func (c *Client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func serveWs(ctx context.Context, hub *Hub, w http.ResponseWriter, r *http.Request) {
+	logger := utils.LoggerFromContext(ctx)
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println(err)
+		logger.Error("failed to upgrade connection to websocket protocol", "err", err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := &Client{
+		hub:     hub,
+		conn:    conn,
+		send:    make(chan []byte, 256),
+		context: ctx,
+		logger:  logger,
+	}
 	client.hub.register <- client
+	client.logger.Info("client registered")
 
 	// Allow collection of memory referenced by the caller
 	// by doing all work in new goroutines.
