@@ -12,8 +12,8 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
-	ticker := time.NewTicker(time.Second)
-	game := game.NewGame(ticker)
+	game := game.NewGame()
 
-	game.Start()
+	ticker := time.NewTicker(time.Second)
+	game.Start(ticker)
 }
