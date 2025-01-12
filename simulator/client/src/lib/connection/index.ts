@@ -59,6 +59,13 @@ class Client {
         this.listeners.push(listener);
     }
 
+    public isConnected = () => this.connected;
+
+    public send(message: Message) {
+        let data = JSON.stringify(message);
+        this.websocket?.send(data);
+    }
+
     private handleOpen() {
         console.info("WebSocket connected");
         this.connected = true;

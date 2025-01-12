@@ -75,7 +75,7 @@ func (h *Hub) Run() {
 		case client := <-h.unregister:
 			delete(h.clients, client)
 		case msg := <-h.broadcast:
-			h.logger.Info("broadcasting message", "message", string(msg))
+			h.logger.Info("broadcasting message")
 			for client := range h.clients {
 				select {
 				// Try sending the message to the connection
