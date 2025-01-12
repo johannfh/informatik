@@ -2,15 +2,24 @@ package game
 
 import (
 	"log/slog"
+	"sync"
 	"time"
+
+	"github.com/johannfh/informatik/simulator/utils"
 )
 
 type Game struct {
-	water    int
-	entities []Entity
+	water   utils.Observable[float64]
+	waterMu sync.Mutex
 
-	nextID EntityID
+	entities   []Entity
+	entitiesMu sync.Mutex
+
+	nextID   EntityID
+	nextIDMu sync.Mutex
+
 	stop   bool
+	stopMu sync.Mutex
 }
 
 func NewGame() *Game {
@@ -22,24 +31,41 @@ func NewGame() *Game {
 func (g *Game) Start(ticker *time.Ticker) {
 	previous := time.Now()
 	for {
+		g.stopMu.Lock()
 		if g.stop {
+			g.stopMu.Unlock()
 			ticker.Stop()
 			break
 		}
+		g.stopMu.Unlock()
 
 		now := <-ticker.C
 		deltatime := now.Sub(previous)
 		g.Tick(deltatime)
+		previous = now
 	}
 }
 
 func (g *Game) Stop() {
+	g.stopMu.Lock()
+	defer g.stopMu.Unlock()
 	g.stop = true
 }
 
 func (g *Game) Reset() {
+	g.stopMu.Lock()
+	defer g.stopMu.Unlock()
+
 	g.stop = true
 	*g = *NewGame()
+}
+
+func (g *Game) GetUniqueID() EntityID {
+	g.nextIDMu.Lock()
+	defer g.nextIDMu.Unlock()
+	nextID := g.nextID
+	g.nextID++
+	return nextID
 }
 
 func (g *Game) Tick(dt time.Duration) {
@@ -56,10 +82,25 @@ func (g *Game) Tick(dt time.Duration) {
 	)
 }
 
-func (g *Game) AddWater(water int) {
-	g.water += water
+func (g *Game) AddWater(water float64) {
+	g.waterMu.Lock()
+	defer g.waterMu.Unlock()
+	val := g.water.Get() + water
+	if val < 0 {
+		g.water.Set(0)
+	} else {
+		g.water.Set(val)
+	}
 }
 
-func (g *Game) GetWater() int {
-	return g.water
+func (g *Game) GetWater() float64 {
+	g.waterMu.Lock()
+	defer g.waterMu.Unlock()
+	return g.water.Get()
+}
+
+func (g *Game) OnWaterChange(fn utils.ListenerFunc[float64]) {
+	g.waterMu.Lock()
+	defer g.waterMu.Unlock()
+	g.water.OnChange(fn)
 }

@@ -22,7 +22,7 @@ func main() {
 	// Game is running in the background
 	go game.Start(ticker)
 
-	hub := api.NewHub(ctx)
+	hub := api.NewHub(ctx, game)
 	go hub.Run()
 
 	srv := api.NewServer(ctx, hub)

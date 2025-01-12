@@ -1,6 +1,13 @@
 package api
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+	"log/slog"
+
+	"github.com/johannfh/informatik/simulator/game"
+	"github.com/johannfh/informatik/simulator/utils"
+)
 
 type Hub struct {
 	clients map[*Client]bool
@@ -11,10 +18,13 @@ type Hub struct {
 	unregister chan *Client
 
 	context context.Context
+	logger  *slog.Logger
+
+	game *game.Game
 }
 
-func NewHub(ctx context.Context) *Hub {
-	return &Hub{
+func NewHub(ctx context.Context, game *game.Game) *Hub {
+	hub := &Hub{
 		clients: make(map[*Client]bool),
 
 		broadcast: make(chan []byte),
@@ -23,7 +33,23 @@ func NewHub(ctx context.Context) *Hub {
 		unregister: make(chan *Client),
 
 		context: ctx,
+		logger:  utils.LoggerFromContext(ctx),
+
+		game: game,
 	}
+
+	hub.game.OnWaterChange(func(val float64) {
+		res, err := json.Marshal(NewServerGameWaterUpdatedMessage(
+			val,
+		))
+		if err != nil {
+			slog.Error("failed to encode json", "err", err, "data", res)
+			return
+		}
+		hub.broadcast <- res
+	})
+
+	return hub
 }
 
 func (h *Hub) Run() {
@@ -34,6 +60,7 @@ func (h *Hub) Run() {
 		case client := <-h.unregister:
 			delete(h.clients, client)
 		case msg := <-h.broadcast:
+			h.logger.Info("broadcasting message", "message", string(msg))
 			for client := range h.clients {
 				select {
 				// Try sending the message to the connection

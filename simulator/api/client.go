@@ -52,11 +52,6 @@ type Client struct {
 	logger *slog.Logger
 }
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
-)
-
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -76,16 +71,16 @@ func (c *Client) readPump() {
 	})
 
 	for {
-		_, message, err := c.conn.ReadMessage()
+		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				c.logger.Error("unexpected websocket close error", "err", err)
 			}
 			return
 		}
-		c.logger.Info("new message")
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.logger.Info("received message from websocket connection", "message", string(message))
+		msg = bytes.TrimSpace(msg)
+		c.logger.Info("received message from websocket connection", "message", string(msg))
+		c.handleMessage(msg)
 	}
 }
 
