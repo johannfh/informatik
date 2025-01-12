@@ -28,14 +28,18 @@ func NewHub(ctx context.Context, g *game.Game) *Hub {
 	hub := &Hub{
 		clients: make(map[*Client]bool),
 
+		// broadcast a message to all clients
 		broadcast: make(chan []byte),
 
-		register:   make(chan *Client),
+		// register a new client
+		register: make(chan *Client),
+		// remove a client registration
 		unregister: make(chan *Client),
 
 		context: ctx,
 		logger:  l,
 
+		// reference to global game state
 		game: g,
 	}
 

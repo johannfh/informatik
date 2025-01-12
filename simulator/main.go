@@ -22,9 +22,11 @@ func main() {
 	// Game is running in the background
 	go game.Start(ticker)
 
+	// WebSocket Hub allows for broadcasting messages via the `broadcast chan []byte` channel.
 	hub := api.NewHub(ctx, game)
 	go hub.Run()
 
+	// create the api server for network communication
 	srv := api.NewServer(ctx, hub)
 	srv.ListenAndServe(":8080")
 }
