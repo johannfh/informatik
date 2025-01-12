@@ -3,8 +3,8 @@ package mathutil
 import "math"
 
 type Vector2D struct {
-	X float64
-	Y float64
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
 }
 
 func (v Vector2D) Abs() Vector2D {

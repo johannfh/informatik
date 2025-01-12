@@ -7,8 +7,16 @@ import (
 )
 
 type Chicken struct {
-	ID  EntityID
-	Pos mathutil.Vector2D
+	Type string   `json:"type"`
+	ID   EntityID `json:"id"`
+
+	Pos mathutil.Vector2D `json:"position"`
+}
+
+func NewChicken() *Chicken {
+	return &Chicken{
+		Type: ChickenType,
+	}
 }
 
 func (w *Chicken) Tick(g *Game, dt time.Duration) {

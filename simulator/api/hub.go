@@ -23,7 +23,8 @@ type Hub struct {
 	game *game.Game
 }
 
-func NewHub(ctx context.Context, game *game.Game) *Hub {
+func NewHub(ctx context.Context, g *game.Game) *Hub {
+	l := utils.LoggerFromContext(ctx)
 	hub := &Hub{
 		clients: make(map[*Client]bool),
 
@@ -33,26 +34,36 @@ func NewHub(ctx context.Context, game *game.Game) *Hub {
 		unregister: make(chan *Client),
 
 		context: ctx,
-		logger:  utils.LoggerFromContext(ctx),
+		logger:  l,
 
-		game: game,
+		game: g,
 	}
-
-	hub.game.OnWaterChange(func(val float64) {
-		res, err := json.Marshal(NewServerGameWaterUpdatedMessage(
-			val,
-		))
-		if err != nil {
-			slog.Error("failed to encode json", "err", err, "data", res)
-			return
-		}
-		hub.broadcast <- res
-	})
 
 	return hub
 }
 
 func (h *Hub) Run() {
+	h.game.OnWaterChange(func(val float64) {
+		res, err := json.Marshal(NewServerGameWaterUpdatedMessage(
+			val,
+		))
+		if err != nil {
+			h.logger.Error("failed to encode json", "err", err, "data", res)
+			return
+		}
+		h.broadcast <- res
+	})
+
+	h.game.OnEntitiesChange(func(val []game.Entity) {
+		res, err := json.Marshal(NewServerGameEntitiesUpdatedMessage(
+			val,
+		))
+		if err != nil {
+			h.logger.Error("failed to encode json", "err", err)
+			return
+		}
+		h.broadcast <- res
+	})
 	for {
 		select {
 		case client := <-h.register:

@@ -15,3 +15,10 @@ type Entity interface {
 	GetPosition() mathutil.Vector2D
 	SetPosition(pos mathutil.Vector2D)
 }
+
+const (
+	WolfType    = "wolf"
+	FoxType     = "fox"
+	SheepType   = "sheep"
+	ChickenType = "chicken"
+)

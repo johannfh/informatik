@@ -7,8 +7,16 @@ import (
 )
 
 type Wolf struct {
-	ID  EntityID
-	Pos mathutil.Vector2D
+	Type string   `json:"type"`
+	ID   EntityID `json:"id"`
+
+	Pos mathutil.Vector2D `json:"position"`
+}
+
+func NewWolf() *Wolf {
+	return &Wolf{
+		Type: WolfType,
+	}
 }
 
 func (w *Wolf) Tick(g *Game, dt time.Duration) {

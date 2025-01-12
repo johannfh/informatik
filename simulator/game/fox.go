@@ -7,8 +7,16 @@ import (
 )
 
 type Fox struct {
-	ID  EntityID
+	Type string
+	ID   EntityID
+
 	Pos mathutil.Vector2D
+}
+
+func NewFox() *Fox {
+	return &Fox{
+		Type: FoxType,
+	}
 }
 
 func (w *Fox) Tick(g *Game, dt time.Duration) {

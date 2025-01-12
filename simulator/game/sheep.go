@@ -7,8 +7,16 @@ import (
 )
 
 type Sheep struct {
-	ID  EntityID
-	Pos mathutil.Vector2D
+	Type string   `json:"type"`
+	ID   EntityID `json:"id"`
+
+	Pos mathutil.Vector2D `json:"position"`
+}
+
+func NewSheep() *Sheep {
+	return &Sheep{
+		Type: SheepType,
+	}
 }
 
 func (w *Sheep) Tick(g *Game, dt time.Duration) {

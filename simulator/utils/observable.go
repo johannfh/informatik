@@ -1,11 +1,16 @@
 package utils
 
-import "log/slog"
-
 type Observable[T any] struct {
 	value T
 
 	listeners []ListenerFunc[T]
+}
+
+func NewObservable[T any](val T) Observable[T] {
+	return Observable[T]{
+		value:     val,
+		listeners: []ListenerFunc[T]{},
+	}
 }
 
 type ListenerFunc[T any] func(val T)
@@ -15,11 +20,14 @@ func (o *Observable[T]) Get() T {
 }
 
 func (o *Observable[T]) Set(val T) {
-	for _, fn := range o.listeners {
-		slog.Info("called event listener")
-		fn(val)
-	}
 	o.value = val
+	o.Trigger()
+}
+
+func (o *Observable[T]) Trigger() {
+	for _, fn := range o.listeners {
+		fn(o.value)
+	}
 }
 
 func (o *Observable[T]) OnChange(fn ListenerFunc[T]) {
