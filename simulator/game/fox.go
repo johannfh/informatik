@@ -7,10 +7,10 @@ import (
 )
 
 type Fox struct {
-	Type string
-	ID   EntityID
+	Type string   `json:"type"`
+	ID   EntityID `json:"id"`
 
-	Pos mathutil.Vector2D
+	Pos mathutil.Vector2D `json:"position"`
 }
 
 func NewFox() *Fox {

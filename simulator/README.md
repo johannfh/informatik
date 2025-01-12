@@ -4,8 +4,9 @@
 
 ### Message Format
 
-All messages are sent as **JSON**.  The type of message is determined by the `messageType` field.
+All messages are sent as **JSON**. If a client fails to comply, the server will immediately terminate the connection.
 
+The type of message is determined by the `messageType` field.
 Scoping of messages is done by seperating words in the `messageType` field with a "`.`".
 Message types are all in lowerCamelCase by convention and case sensitive.
 
@@ -68,6 +69,10 @@ type ErrorMessage = {
 
 #### List of errors
 
+- **`error.unknownMessageType`** (Error: Non-Fatal)
+
+  Indicated an error with the `messageType` field of a prior message.
+
 - **`error.invalidMessageFormat`** (Error: Non-Fatal)
 
   Indicates an error in a prior message format.
@@ -84,11 +89,6 @@ type ErrorMessage = {
   ```
 
   This would result in an error sent by the server.
-
-
-- **`error.unknownMessageType`**
-
-  Indicated an error with the `messageType` field of a prior message.
 
 - **`error.unknownEntityError`** (Error: Non-Fatal)
   

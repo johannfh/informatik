@@ -26,13 +26,17 @@ type Message map[string]any
 
 func (c *Client) handleMessage(msg []byte) {
 	if !json.Valid(msg) {
-		c.logger.Error("received invalid json from client")
+		c.logger.Error("received invalid json from client", "message", string(msg))
 		res, err := json.Marshal(NewErrorInvalidMessageFormatMessage("message not decodable as json"))
 		if err != nil {
 			c.logger.Error("failed to encode json", "err", err)
 			return
 		}
 		c.send <- res
+
+		// Fatal violation of protocol.
+		// Terminate connection immediately.
+		c.conn.Close()
 		return
 	}
 
