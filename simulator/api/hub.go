@@ -71,7 +71,9 @@ func (h *Hub) Run() {
 	for {
 		select {
 		case client := <-h.register:
+			h.SendAllStateToClient(client)
 			h.clients[client] = true
+
 		case client := <-h.unregister:
 			delete(h.clients, client)
 		case msg := <-h.broadcast:
@@ -88,4 +90,26 @@ func (h *Hub) Run() {
 			}
 		}
 	}
+}
+
+func (h *Hub) SendAllStateToClient(c *Client) {
+	water := h.game.GetWater()
+	waterMsg, err := json.Marshal(NewServerGameWaterUpdatedMessage(
+		water,
+	))
+	if err != nil {
+		h.logger.Error("failed to encode json", "err", err, "data", waterMsg)
+		return
+	}
+	c.send <- waterMsg
+
+	entities := h.game.GetEntities()
+	entitiesMsg, err := json.Marshal(NewServerGameEntitiesUpdatedMessage(
+		entities,
+	))
+	if err != nil {
+		h.logger.Error("failed to encode json", "err", err)
+		return
+	}
+	c.send <- entitiesMsg
 }

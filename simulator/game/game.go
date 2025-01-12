@@ -92,6 +92,20 @@ func (g *Game) AddEntity(entity Entity) {
 	g.entities.Set(append(g.entities.Get(), entity))
 }
 
+func (g *Game) GetEntities() []Entity {
+	g.entitiesMu.Lock()
+	g.entitiesMu.Unlock()
+
+	// Get current state
+	entities := g.entities.Get()
+
+	// Create a copy
+	entitiesCopy := make([]Entity, len(entities))
+	copy(entitiesCopy, entities)
+
+	return entitiesCopy
+}
+
 func (g *Game) OnEntitiesChange(fn utils.ListenerFunc[[]Entity]) {
 	g.entitiesMu.Lock()
 	defer g.entitiesMu.Unlock()
