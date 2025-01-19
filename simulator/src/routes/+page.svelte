@@ -70,7 +70,7 @@
             <li>
                 <code>LMB</code>
                 <span>to spawn </span>
-                <select bind:value={spawnOption} class="p-2 rounded-md bg-gray-200 cursor-pointer hover:bg-gray-300 outline">
+                <select bind:value={spawnOption} class="p-2 rounded-md bg-gray-200 cursor-pointer hover:bg-gray-300 outline-none">
                     <option value="wolf">Wolf</option>
                     <option value="sheep">Sheep</option>
                     <option value="fox">Fox</option>
