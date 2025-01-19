@@ -2,9 +2,15 @@
     import { onMount } from "svelte";
     import * as ex from "excalibur";
     import { loader } from "$lib/resources";
-    import { inputEvents, MainScene, type KillAnimalEvent, type SpawnAnimalEvent } from "$lib/main-scene";
-    import { type AnimalOption } from "$src/lib/types";
+    import {
+        inputEvents,
+        MainScene,
+        type KillAnimalEvent,
+        type SpawnAnimalEvent,
+    } from "$lib/main-scene";
+    import { type AnimalOption } from "$lib/types";
     import { screenHeight, screenWidth } from "$lib/constants";
+    import { Chicken, Fox, Sheep, Wolf } from "$lib";
 
     let gameCanvas: HTMLCanvasElement;
 
@@ -16,7 +22,7 @@
             scenes: {
                 start: MainScene,
             },
-        })
+        });
 
         game.start("start", {
             // name of the start scene 'start'
@@ -29,32 +35,30 @@
             }),
         }).then(() => console.log("game started"));
 
-        function spawn({
-            animal, position
-        }: Omit<SpawnAnimalEvent, "type">) {
-            console.log(`spawn: ${animal} @ ${position.x}:${position.y}`)
-            inputEvents.update(v => [...v, ({ type: "spawnAnimalEvent", animal, position })])
+        function spawn({ animal, position }: Omit<SpawnAnimalEvent, "type">) {
+            console.log(`spawn: ${animal.name} @ ${position.x}:${position.y}`);
+            inputEvents.update((v) => [...v, { type: "spawnAnimalEvent", animal, position }]);
         }
 
         function kill({ position }: Omit<KillAnimalEvent, "type">) {
-            console.log(`kill: ${position.x}:${position.y}`)
-            inputEvents.update(v => [...v, ({ type: "killAnimalEvent", position })])
+            console.log(`kill: ${position.x}:${position.y}`);
+            inputEvents.update((v) => [...v, { type: "killAnimalEvent", position }]);
         }
 
         game.input.pointers.on("down", ({ button, pointerId, worldPos }) => {
             switch (button) {
                 case "Left":
-                    spawn({ animal: spawnOption, position: worldPos })
+                    spawn({ animal: spawnOption, position: worldPos });
                     break;
-            
+
                 case "Right":
-                    kill({ position: worldPos })
+                    kill({ position: worldPos });
                     break;
             }
-        })
-    })
+        });
+    });
 
-    let spawnOption: AnimalOption = "wolf";
+    let spawnOption: AnimalOption = Wolf;
 </script>
 
 <div class="flex flex-col items-center justify-center w-screen h-screen gap-4">
@@ -71,11 +75,14 @@
             <li>
                 <code>LMB</code>
                 <span>to spawn </span>
-                <select bind:value={spawnOption} class="p-2 rounded-md bg-gray-200 cursor-pointer hover:bg-gray-300 outline-none">
-                    <option value="wolf">Wolf</option>
-                    <option value="sheep">Sheep</option>
-                    <option value="fox">Fox</option>
-                    <option value="chicken">Chicken</option>
+                <select
+                    bind:value={spawnOption}
+                    class="p-2 rounded-md bg-gray-200 cursor-pointer hover:bg-gray-300 outline-none"
+                >
+                    <option value={Wolf}>Wolf</option>
+                    <option value={Sheep}>Sheep</option>
+                    <option value={Fox}>Fox</option>
+                    <option value={Chicken}>Chicken</option>
                 </select>
                 <span>at cursor position</span>
             </li>
@@ -95,7 +102,6 @@
         }
 
         > li.unimplemented {
-
         }
     }
 </style>

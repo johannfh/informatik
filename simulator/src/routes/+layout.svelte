@@ -1,7 +1,7 @@
 <script lang="ts">
-    import "$src/app.css"
+    import "$src/app.css";
 
-    let { children } = $props()
+    let { children } = $props();
 </script>
 
 {@render children()}
