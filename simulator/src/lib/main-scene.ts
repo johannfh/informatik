@@ -5,37 +5,29 @@ import { Resources } from "./resources";
 import { screenWidth } from "./constants";
 import { writable, type Writable } from "svelte/store";
 
-const CreatePreyCreator = (
-  speed: number,
-  name?: string,
-  predatorGetter?: PredatorGetter,
-  sprite?: ex.Sprite,
-) => (position: ex.Vector) =>
-    new Prey(
-      speed,
-      name,
-      position,
-      predatorGetter,
-      sprite,
-    );
+const CreatePreyCreator =
+  (
+    speed: number,
+    name?: string,
+    predatorGetter?: PredatorGetter,
+    sprite?: ex.Sprite,
+  ) =>
+  (position: ex.Vector) =>
+    new Prey(speed, name, position, predatorGetter, sprite);
 
-
-const CreatePredatorCreator = (
-  speed: number,
-  name?: string,
-  preyGetter?: PreyGetter,
-  sprite?: ex.Sprite,
-) => (position: ex.Vector) => new Predator(speed, name, position, preyGetter, sprite);
-
+const CreatePredatorCreator =
+  (speed: number, name?: string, preyGetter?: PreyGetter, sprite?: ex.Sprite) =>
+  (position: ex.Vector) =>
+    new Predator(speed, name, position, preyGetter, sprite);
 
 export type AnimalOption = "wolf" | "sheep" | "fox" | "chicken";
 export type SpawnAnimalEvent = {
-  type: "spawnAnimalEvent",
+  type: "spawnAnimalEvent";
   animal: AnimalOption;
   position: ex.Vector;
 };
 export type KillAnimalEvent = {
-  type: "killAnimalEvent",
+  type: "killAnimalEvent";
   position: ex.Vector;
 };
 
@@ -102,36 +94,35 @@ export class MainScene extends ex.Scene {
   }
 
   override onInitialize(engine: ex.Engine): void {
-    inputEvents.subscribe(v => {
-      let event = v.shift()
+    inputEvents.subscribe((v) => {
+      let event = v.shift();
       if (!event) return;
 
       switch (event.type) {
         case "spawnAnimalEvent":
-          this.handleSpawnAnimal(event)
+          this.handleSpawnAnimal(event);
           break;
 
         default:
-          console.error(`event '${event.type}' currently unimplemented`)
+          console.error(`event '${event.type}' currently unimplemented`);
           break;
-      
       }
-    })
+    });
   }
-  
+
   private handleSpawnAnimal({ animal, position }: SpawnAnimalEvent) {
     switch (animal) {
       case "fox":
-        this.add(this.foxCreator(position))
+        this.add(this.foxCreator(position));
         break;
       case "chicken":
-        this.add(this.chickenCreator(position))
+        this.add(this.chickenCreator(position));
         break;
       case "wolf":
-        this.add(this.wolfCreator(position))
+        this.add(this.wolfCreator(position));
         break;
       case "sheep":
-        this.add(this.sheepCreator(position))
+        this.add(this.sheepCreator(position));
         break;
     }
   }
