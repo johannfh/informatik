@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import * as ex from "excalibur";
     import { loader } from "$lib/resources";
-    import { MainScene } from "$lib/main-scene";
+    import { inputEvents, MainScene, type AnimalOption, type SpawnAnimalEvent } from "$lib/main-scene";
     import { screenHeight, screenWidth } from "$lib/constants";
 
     let gameCanvas: HTMLCanvasElement;
@@ -26,18 +26,43 @@
                 direction: "in",
                 color: ex.Color.ExcaliburBlue,
             }),
-        }).then(() => {
-            // Do something after the game starts
-            console.log("game started");
-        });
+        }).then(() => console.log("game started"));
+
+        function spawn({
+            animal, position
+        }: Omit<SpawnAnimalEvent, "type">) {
+            console.log(`spawn: ${animal} @ ${position.x}:${position.y}`)
+            inputEvents.update(v => [...v, ({ type: "spawnAnimalEvent", animal, position })])
+        }
+
+        game.input.pointers.on("down", ({ pointerId, worldPos }) => {
+            spawn({ animal: spawnOption, position: worldPos })
+        })
     })
+
+    let spawnOption: AnimalOption = "wolf";
 </script>
 
-<div class="flex flex-col">
-    <div class="menu">
-
-    </div>
-    <div class="p-4">
+<div class="flex flex-col items-center justify-center w-screen h-screen gap-4">
+    {@render gameControls()}
+    <div class="p-2 border-2 rounded-md border-zinc-800">
         <canvas bind:this={gameCanvas}></canvas>
     </div>
 </div>
+
+{#snippet gameControls()}
+    <div class="flex flex-row gap-4">
+        <select bind:value={spawnOption} class="p-2 rounded-md">
+            <option value="wolf">Wolf</option>
+            <option value="sheep">Sheep</option>
+            <option value="fox">Fox</option>
+            <option value="chicken">Chicken</option>
+        </select>
+        <div>
+            <h1 class="text-2xl font-bold underline">Controls</h1>
+            <ul class="p-2">
+                <li>LMB to spawn animal at cursor position</li>
+            </ul>
+        </div>
+    </div>
+{/snippet}

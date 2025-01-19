@@ -3,54 +3,61 @@ import { type PredatorGetter, Prey } from "./prey";
 import { Predator, type PreyGetter } from "./predator";
 import { Resources } from "./resources";
 import { screenWidth } from "./constants";
+import { writable, type Writable } from "svelte/store";
 
-function CreatePreyCreator(
+const CreatePreyCreator = (
   speed: number,
   name?: string,
   predatorGetter?: PredatorGetter,
   sprite?: ex.Sprite,
-) {
-  return () =>
+) => (position: ex.Vector) =>
     new Prey(
       speed,
       name,
-      ex.vec((Math.random() - 0.5) * 100 + screenWidth / 2, 300),
+      position,
       predatorGetter,
       sprite,
     );
-}
 
-function CreatePredatorCreator(
+
+const CreatePredatorCreator = (
   speed: number,
   name?: string,
   preyGetter?: PreyGetter,
   sprite?: ex.Sprite,
-) {
-  return () =>
-    new Predator(
-      speed,
-      name,
-      ex.vec((Math.random() - 0.5) * 100 + screenWidth / 2, 200),
-      preyGetter,
-      sprite,
-    );
-}
+) => (position: ex.Vector) => new Predator(speed, name, position, preyGetter, sprite);
+
+
+export type AnimalOption = "wolf" | "sheep" | "fox" | "chicken";
+export type SpawnAnimalEvent = {
+  type: "spawnAnimalEvent",
+  animal: AnimalOption;
+  position: ex.Vector;
+};
+export type KillAnimalEvent = {
+  type: "killAnimalEvent",
+  position: ex.Vector;
+};
+
+export type InputEvent = SpawnAnimalEvent | KillAnimalEvent;
+
+export let inputEvents: Writable<InputEvent[]> = writable([]);
 
 export class MainScene extends ex.Scene {
   private chickenName = "chicken";
-  private chickenCreator: () => Prey;
+  private chickenCreator: (position: ex.Vector) => Prey;
   private chickenPredatorGetter: PredatorGetter;
 
   private foxName = "fox";
-  private foxCreator: () => Predator;
+  private foxCreator: (position: ex.Vector) => Predator;
   private foxPreyGetter: PreyGetter;
 
   private sheepName = "sheep";
-  private sheepCreator: () => Prey;
+  private sheepCreator: (position: ex.Vector) => Prey;
   private sheepPredatorGetter: PredatorGetter;
 
   private wolfName = "wolf";
-  private wolfCreator: () => Predator;
+  private wolfCreator: (position: ex.Vector) => Predator;
   private wolfPreyGetter: PreyGetter;
 
   constructor() {
@@ -95,15 +102,38 @@ export class MainScene extends ex.Scene {
   }
 
   override onInitialize(engine: ex.Engine): void {
-    const chicken = this.chickenCreator();
-    this.add(chicken);
-    const fox = this.foxCreator();
-    this.add(fox);
+    inputEvents.subscribe(v => {
+      let event = v.shift()
+      if (!event) return;
 
-    const sheep = this.sheepCreator();
-    this.add(sheep);
-    const wolf = this.wolfCreator();
-    this.add(wolf);
+      switch (event.type) {
+        case "spawnAnimalEvent":
+          this.handleSpawnAnimal(event)
+          break;
+
+        default:
+          console.error(`event '${event.type}' currently unimplemented`)
+          break;
+      
+      }
+    })
+  }
+  
+  private handleSpawnAnimal({ animal, position }: SpawnAnimalEvent) {
+    switch (animal) {
+      case "fox":
+        this.add(this.foxCreator(position))
+        break;
+      case "chicken":
+        this.add(this.chickenCreator(position))
+        break;
+      case "wolf":
+        this.add(this.wolfCreator(position))
+        break;
+      case "sheep":
+        this.add(this.sheepCreator(position))
+        break;
+    }
   }
 
   override onPreLoad(loader: ex.DefaultLoader): void {
