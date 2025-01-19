@@ -27,8 +27,8 @@ export class Predator extends ex.Actor {
     }
 
     private set targetPos(pos: ex.Vector) {
-        this._targetPos.x = ex.clamp(MIN_X, MAX_X, pos.x)
-        this._targetPos.y = ex.clamp(MIN_Y, MAX_Y, pos.y)
+        this._targetPos.x = ex.clamp(MIN_X, MAX_X, pos.x);
+        this._targetPos.y = ex.clamp(MIN_Y, MAX_Y, pos.y);
     }
 
     constructor(
@@ -37,7 +37,7 @@ export class Predator extends ex.Actor {
         private preyGetter: PreyGetter = () => [],
         private sprite: ex.Sprite = Resources.Sword.toSprite(),
     ) {
-        let pos = ex.vec(200, 200)
+        let pos = ex.vec(200, 200);
         super({
             name: name,
             pos: pos,
@@ -47,7 +47,7 @@ export class Predator extends ex.Actor {
 
         this._targetPos = pos;
 
-        this.sprite.scale = this.sprite.scale.normalize()
+        this.sprite.scale = this.sprite.scale.normalize();
         this.sprite.scale.x /= 5;
         this.sprite.scale.y /= 5;
     }
@@ -94,18 +94,26 @@ export class Predator extends ex.Actor {
 
         let attackDistance = 30;
         this.targetPos = this.pos.add(
-            closestEnemy.actor.pos.sub(this.pos).normalize().rotate((Math.random() - 0.5) * Math.PI / 1.5).scale(attackDistance)
+            closestEnemy.actor.pos
+                .sub(this.pos)
+                .normalize()
+                .rotate(((Math.random() - 0.5) * Math.PI) / 1.5)
+                .scale(attackDistance),
         );
     }
 
     private wander() {
         let wanderDistance = 100;
 
-        this.targetPos = this.pos.add(ex.vec(
-            (Math.random() - 0.5) * 2 * wanderDistance,
-            (Math.random() - 0.5) * 2 * wanderDistance,
-        ));
+        this.targetPos = this.pos.add(
+            ex.vec(
+                (Math.random() - 0.5) * 2 * wanderDistance,
+                (Math.random() - 0.5) * 2 * wanderDistance,
+            ),
+        );
 
-        console.log(`from ${this.pos.x.toFixed(3)}-${this.pos.y.toFixed(3)} to ${this.targetPos.x.toFixed(3)}-${this.targetPos.y.toFixed(3)}`)
+        console.log(
+            `from ${this.pos.x.toFixed(3)}-${this.pos.y.toFixed(3)} to ${this.targetPos.x.toFixed(3)}-${this.targetPos.y.toFixed(3)}`,
+        );
     }
 }

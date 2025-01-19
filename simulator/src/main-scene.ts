@@ -3,11 +3,21 @@ import { PredatorGetter, Prey } from "./prey";
 import { Predator, PreyGetter } from "./predator";
 import { Resources } from "./resources";
 
-function CreatePreyCreator(speed: number, name?: string, predatorGetter?: PredatorGetter, sprite?: ex.Sprite) {
+function CreatePreyCreator(
+    speed: number,
+    name?: string,
+    predatorGetter?: PredatorGetter,
+    sprite?: ex.Sprite,
+) {
     return () => new Prey(speed, name, predatorGetter, sprite);
 }
 
-function CreatePredatorCreator(speed: number, name?: string, preyGetter?: PreyGetter, sprite?: ex.Sprite) {
+function CreatePredatorCreator(
+    speed: number,
+    name?: string,
+    preyGetter?: PreyGetter,
+    sprite?: ex.Sprite,
+) {
     return () => new Predator(speed, name, preyGetter, sprite);
 }
 
@@ -84,9 +94,9 @@ export class MainScene extends ex.Scene {
         this.add(fox);
 
         const sheep = this.sheepCreator();
-        this.add(sheep)
+        this.add(sheep);
         const wolf = this.wolfCreator();
-        this.add(wolf)
+        this.add(wolf);
     }
 
     override onPreLoad(loader: ex.DefaultLoader): void {

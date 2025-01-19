@@ -13,8 +13,6 @@ import { screenHeight, screenWidth } from "./constants";
 
 export type PredatorGetter = () => ex.Actor[];
 
-
-
 const MIN_X = 10;
 const MAX_X = screenWidth - 10;
 
@@ -29,8 +27,8 @@ export class Prey extends ex.Actor {
     }
 
     private set targetPos(pos: ex.Vector) {
-        this._targetPos.x = ex.clamp(pos.x, MIN_X, MAX_X)
-        this._targetPos.y = ex.clamp(pos.y, MIN_Y, MAX_Y)
+        this._targetPos.x = ex.clamp(pos.x, MIN_X, MAX_X);
+        this._targetPos.y = ex.clamp(pos.y, MIN_Y, MAX_Y);
     }
 
     constructor(
@@ -39,7 +37,7 @@ export class Prey extends ex.Actor {
         private predatorGetter: PredatorGetter = () => [],
         private sprite: ex.Sprite = Resources.Sword.toSprite(),
     ) {
-        let pos = ex.vec(500, 500)
+        let pos = ex.vec(500, 500);
         super({
             name: name,
             pos: pos,
@@ -49,7 +47,7 @@ export class Prey extends ex.Actor {
 
         this._targetPos = pos;
 
-        this.sprite.scale = this.sprite.scale.normalize()
+        this.sprite.scale = this.sprite.scale.normalize();
         this.sprite.scale.x /= 5;
         this.sprite.scale.y /= 5;
     }
@@ -103,15 +101,21 @@ export class Prey extends ex.Actor {
     private wander() {
         let wanderDistance = 100;
 
-        this.targetPos = this.pos.add(ex.vec(
-            (Math.random() - 0.5) * 2 * wanderDistance,
-            (Math.random() - 0.5) * 2 * wanderDistance,
-        ));
-        console.log(`from ${this.pos.x.toFixed(3)}-${this.pos.y.toFixed(3)} to ${this.targetPos.x.toFixed(3)}-${this.targetPos.y.toFixed(3)}`)
+        this.targetPos = this.pos.add(
+            ex.vec(
+                (Math.random() - 0.5) * 2 * wanderDistance,
+                (Math.random() - 0.5) * 2 * wanderDistance,
+            ),
+        );
+        console.log(
+            `from ${this.pos.x.toFixed(3)}-${this.pos.y.toFixed(3)} to ${this.targetPos.x.toFixed(3)}-${this.targetPos.y.toFixed(3)}`,
+        );
     }
 
     private runFrom(position: ex.Vector) {
         let runDistance = 100;
-        this.targetPos = this.pos.add(this.pos.sub(position).normalize().scale(runDistance))
+        this.targetPos = this.pos.add(
+            this.pos.sub(position).normalize().scale(runDistance),
+        );
     }
 }
