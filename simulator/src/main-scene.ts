@@ -9,7 +9,14 @@ function CreatePreyCreator(
     predatorGetter?: PredatorGetter,
     sprite?: ex.Sprite,
 ) {
-    return () => new Prey(speed, name, predatorGetter, sprite);
+    return () =>
+        new Prey(
+            speed,
+            name,
+            ex.vec((Math.random() - 0.5) * 200 + 500, 600),
+            predatorGetter,
+            sprite,
+        );
 }
 
 function CreatePredatorCreator(
@@ -18,7 +25,14 @@ function CreatePredatorCreator(
     preyGetter?: PreyGetter,
     sprite?: ex.Sprite,
 ) {
-    return () => new Predator(speed, name, preyGetter, sprite);
+    return () =>
+        new Predator(
+            speed,
+            name,
+            ex.vec((Math.random() - 0.5) * 200 + 500, 400),
+            preyGetter,
+            sprite,
+        );
 }
 
 export class MainScene extends ex.Scene {

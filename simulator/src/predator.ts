@@ -34,10 +34,10 @@ export class Predator extends ex.Actor {
     constructor(
         public speed: number,
         name?: string,
+        pos: ex.Vector = ex.vec(500, 500),
         private preyGetter: PreyGetter = () => [],
         private sprite: ex.Sprite = Resources.Sword.toSprite(),
     ) {
-        let pos = ex.vec(200, 200);
         super({
             name: name,
             pos: pos,
