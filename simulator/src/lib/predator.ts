@@ -1,15 +1,8 @@
 import * as ex from "excalibur";
 import { Resources } from "./resources";
 import { screenHeight, screenWidth } from "./constants";
-
-// They contain a bunch of useful components that you might use
-// actor.transform
-// actor.motion
-// actor.graphics
-// actor.body
-// actor.collider
-// actor.actions
-// actor.pointer
+import type { AnimalGetter, AnimalOption, PredatorAnimal } from "./types";
+import type { PreyAnimal } from "./types";
 
 export type PreyGetter = () => ex.Actor[];
 
@@ -19,8 +12,18 @@ const MAX_X = screenWidth - 10;
 const MIN_Y = 10;
 const MAX_Y = screenHeight - 10;
 
+export type NewPredatorParams = {
+  type: PredatorAnimal;
+  position: ex.Vector;
+  animalGetter: AnimalGetter;
+};
+
 export class Predator extends ex.Actor {
   private _targetPos: ex.Vector;
+  private speed: number;
+  private animalGetter: AnimalGetter;
+  sprite: ex.Sprite;
+  preyList: AnimalOption[];
 
   private get targetPos(): ex.Vector {
     return this._targetPos;
@@ -31,21 +34,29 @@ export class Predator extends ex.Actor {
     this._targetPos.y = ex.clamp(pos.y, MIN_Y, MAX_Y);
   }
 
-  constructor(
-    public speed: number,
-    name?: string,
-    pos: ex.Vector = ex.vec(500, 500),
-    private preyGetter: PreyGetter = () => [],
-    private sprite: ex.Sprite = Resources.Sword.toSprite(),
-  ) {
+  constructor({ position, animalGetter, type }: NewPredatorParams) {
     super({
-      name: name,
-      pos: pos,
-      width: 100,
-      height: 100,
+      name: type,
+      pos: position,
+      width: 20,
+      height: 20,
     });
 
-    this._targetPos = pos;
+    this._targetPos = position;
+
+    if (type === "fox") {
+      // fox
+      this.sprite = Resources.Fox.toSprite();
+      this.speed = 120;
+      this.preyList = ["chicken"];
+    } else {
+      // wolf
+      this.sprite = Resources.Wolf.toSprite();
+      this.speed = 70;
+      this.preyList = ["sheep"];
+    }
+
+    this.animalGetter = animalGetter;
 
     this.sprite.scale = this.sprite.scale.normalize();
     this.sprite.scale.x /= 5;
@@ -63,8 +74,18 @@ export class Predator extends ex.Actor {
     this.movementLogic(deltatime);
   }
 
+  override onCollisionStart(
+    self: ex.Collider,
+    other: ex.Collider,
+    side: ex.Side,
+    contact: ex.CollisionContact,
+  ): void {
+    if (!this.preyList.includes(other.owner.name as PreyAnimal)) return;
+    other.owner.kill();
+  }
+
   private movementLogic(deltatime: number) {
-    let enemies = this.preyGetter();
+    let enemies = this.animalGetter(this.preyList);
     if (this.pos.distance(this.targetPos) > 1) {
       let direction = this.targetPos.sub(this.pos).normalize();
       this.pos = this.pos.add(direction.scale(this.speed * deltatime));
@@ -110,10 +131,6 @@ export class Predator extends ex.Actor {
         (Math.random() - 0.5) * 2 * wanderDistance,
         (Math.random() - 0.5) * 2 * wanderDistance,
       ),
-    );
-
-    console.log(
-      `from ${this.pos.x.toFixed(3)}-${this.pos.y.toFixed(3)} to ${this.targetPos.x.toFixed(3)}-${this.targetPos.y.toFixed(3)}`,
     );
   }
 }

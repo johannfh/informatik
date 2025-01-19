@@ -1,15 +1,7 @@
 import * as ex from "excalibur";
 import { Resources } from "./resources";
 import { screenHeight, screenWidth } from "./constants";
-
-// They contain a bunch of useful components that you might use
-// actor.transform
-// actor.motion
-// actor.graphics
-// actor.body
-// actor.collider
-// actor.actions
-// actor.pointer
+import type { AnimalGetter, PredatorAnimal, PreyAnimal } from "./types";
 
 export type PredatorGetter = () => ex.Actor[];
 
@@ -19,8 +11,18 @@ const MAX_X = screenWidth - 10;
 const MIN_Y = 10;
 const MAX_Y = screenHeight - 10;
 
+export type NewPreyParams = {
+  type: PreyAnimal;
+  position: ex.Vector;
+  animalGetter: AnimalGetter;
+};
+
 export class Prey extends ex.Actor {
   private _targetPos: ex.Vector;
+  sprite: ex.Sprite;
+  speed: number;
+  predatorList: PredatorAnimal[];
+  animalGetter: AnimalGetter;
 
   private get targetPos(): ex.Vector {
     return this._targetPos;
@@ -31,21 +33,29 @@ export class Prey extends ex.Actor {
     this._targetPos.y = ex.clamp(pos.y, MIN_Y, MAX_Y);
   }
 
-  constructor(
-    public speed: number,
-    name?: string,
-    pos: ex.Vector = ex.vec(500, 500),
-    private predatorGetter: PredatorGetter = () => [],
-    private sprite: ex.Sprite = Resources.Sword.toSprite(),
-  ) {
+  constructor({ position, animalGetter, type }: NewPreyParams) {
     super({
-      name: name,
-      pos: pos,
-      width: 100,
-      height: 100,
+      name: type,
+      pos: position,
+      width: 20,
+      height: 20,
     });
 
-    this._targetPos = pos;
+    this._targetPos = position;
+
+    if (type === "chicken") {
+      // chicken
+      this.sprite = Resources.Chicken.toSprite();
+      this.speed = 40;
+      this.predatorList = ["fox"];
+    } else {
+      // sheep
+      this.sprite = Resources.Sheep.toSprite();
+      this.speed = 50;
+      this.predatorList = ["wolf"];
+    }
+
+    this.animalGetter = animalGetter;
 
     this.sprite.scale = this.sprite.scale.normalize();
     this.sprite.scale.x /= 5;
@@ -64,7 +74,7 @@ export class Prey extends ex.Actor {
   }
 
   private movementLogic(deltatime: number) {
-    let enemies = this.predatorGetter();
+    let enemies = this.animalGetter(this.predatorList);
     let speed = 100;
 
     if (this.pos.distance(this.targetPos) > 1) {
@@ -106,9 +116,6 @@ export class Prey extends ex.Actor {
         (Math.random() - 0.5) * 2 * wanderDistance,
         (Math.random() - 0.5) * 2 * wanderDistance,
       ),
-    );
-    console.log(
-      `from ${this.pos.x.toFixed(3)}-${this.pos.y.toFixed(3)} to ${this.targetPos.x.toFixed(3)}-${this.targetPos.y.toFixed(3)}`,
     );
   }
 

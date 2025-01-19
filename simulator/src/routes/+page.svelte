@@ -2,7 +2,8 @@
     import { onMount } from "svelte";
     import * as ex from "excalibur";
     import { loader } from "$lib/resources";
-    import { inputEvents, MainScene, type AnimalOption, type KillAnimalEvent, type SpawnAnimalEvent } from "$lib/main-scene";
+    import { inputEvents, MainScene, type KillAnimalEvent, type SpawnAnimalEvent } from "$lib/main-scene";
+    import { type AnimalOption } from "$src/lib/types";
     import { screenHeight, screenWidth } from "$lib/constants";
 
     let gameCanvas: HTMLCanvasElement;
