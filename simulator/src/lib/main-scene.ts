@@ -97,6 +97,7 @@ export class MainScene extends ex.Scene {
     inputEvents.subscribe((v) => {
       let event = v.shift();
       if (!event) return;
+      console.log(`handling ${event.type}`)
 
       switch (event.type) {
         case "spawnAnimalEvent":
@@ -104,7 +105,7 @@ export class MainScene extends ex.Scene {
           break;
 
         default:
-          console.error(`event '${event.type}' currently unimplemented`);
+          console.error(`event handler for '${event.type}' currently unimplemented`);
           break;
       }
     });

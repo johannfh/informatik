@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import * as ex from "excalibur";
     import { loader } from "$lib/resources";
-    import { inputEvents, MainScene, type AnimalOption, type SpawnAnimalEvent } from "$lib/main-scene";
+    import { inputEvents, MainScene, type AnimalOption, type KillAnimalEvent, type SpawnAnimalEvent } from "$lib/main-scene";
     import { screenHeight, screenWidth } from "$lib/constants";
 
     let gameCanvas: HTMLCanvasElement;
@@ -35,8 +35,21 @@
             inputEvents.update(v => [...v, ({ type: "spawnAnimalEvent", animal, position })])
         }
 
-        game.input.pointers.on("down", ({ pointerId, worldPos }) => {
-            spawn({ animal: spawnOption, position: worldPos })
+        function kill({ position }: Omit<KillAnimalEvent, "type">) {
+            console.log(`kill: ${position.x}:${position.y}`)
+            inputEvents.update(v => [...v, ({ type: "killAnimalEvent", position })])
+        }
+
+        game.input.pointers.on("down", ({ button, pointerId, worldPos }) => {
+            switch (button) {
+                case "Left":
+                    spawn({ animal: spawnOption, position: worldPos })
+                    break;
+            
+                case "Right":
+                    kill({ position: worldPos })
+                    break;
+            }
         })
     })
 
@@ -51,18 +64,37 @@
 </div>
 
 {#snippet gameControls()}
-    <div class="flex flex-row gap-4">
-        <select bind:value={spawnOption} class="p-2 rounded-md">
-            <option value="wolf">Wolf</option>
-            <option value="sheep">Sheep</option>
-            <option value="fox">Fox</option>
-            <option value="chicken">Chicken</option>
-        </select>
-        <div>
-            <h1 class="text-2xl font-bold underline">Controls</h1>
-            <ul class="p-2">
-                <li>LMB to spawn animal at cursor position</li>
-            </ul>
-        </div>
+    <div class="flex flex-col gap-2">
+        <h1 class="text-2xl font-bold underline w-[500px]">Controls</h1>
+        <ul class="control-list">
+            <li>
+                <code>LMB</code>
+                <span>to spawn </span>
+                <select bind:value={spawnOption} class="p-2 rounded-md bg-gray-200 cursor-pointer hover:bg-gray-300 outline">
+                    <option value="wolf">Wolf</option>
+                    <option value="sheep">Sheep</option>
+                    <option value="fox">Fox</option>
+                    <option value="chicken">Chicken</option>
+                </select>
+                <span>at cursor position</span>
+            </li>
+            <li class="unimplemented"><code>RMB</code> to kill animals at cursor position</li>
+        </ul>
     </div>
 {/snippet}
+
+<style>
+    ul.control-list {
+        @apply p-2 flex flex-col gap-2;
+        > li {
+            @apply bg-gray-100 p-2 flex flex-row items-center gap-x-1;
+            > code {
+                @apply font-bold bg-gray-200 p-2 rounded-full;
+            }
+        }
+
+        > li.unimplemented {
+
+        }
+    }
+</style>

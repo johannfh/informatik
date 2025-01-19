@@ -27,8 +27,8 @@ export class Predator extends ex.Actor {
   }
 
   private set targetPos(pos: ex.Vector) {
-    this._targetPos.x = ex.clamp(MIN_X, MAX_X, pos.x);
-    this._targetPos.y = ex.clamp(MIN_Y, MAX_Y, pos.y);
+    this._targetPos.x = ex.clamp(pos.x, MIN_X, MAX_X);
+    this._targetPos.y = ex.clamp(pos.y, MIN_Y, MAX_Y);
   }
 
   constructor(
