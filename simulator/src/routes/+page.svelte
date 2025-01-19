@@ -61,16 +61,21 @@
     let spawnOption: AnimalOption = Wolf;
 </script>
 
-<div class="flex flex-col items-center justify-center w-screen h-screen gap-4">
-    {@render gameControls()}
-    <div class="p-2 border-2 rounded-md border-zinc-800">
-        <canvas bind:this={gameCanvas}></canvas>
+<div class="w-screen h-screen flex flex-row">
+    <div class="p-4 flex flex-col gap-4">
+        {@render gameControls()}
+        <!-- {@render gameStats()} -->
+    </div>
+    <div class="flex items-center justify-center flex-grow">
+        <div class="p-2 border-2 rounded-md border-zinc-800">
+            <canvas bind:this={gameCanvas}></canvas>
+        </div>
     </div>
 </div>
 
 {#snippet gameControls()}
     <div class="flex flex-col gap-2">
-        <h1 class="text-2xl font-bold underline w-[500px]">Controls</h1>
+        <h1 class="text-2xl font-bold underline">Controls</h1>
         <ul class="control-list">
             <li>
                 <code>LMB</code>
@@ -89,6 +94,10 @@
             <li class="unimplemented"><code>RMB</code> to kill animals at cursor position</li>
         </ul>
     </div>
+{/snippet}
+
+{#snippet gameStats()}
+    <h1 class="text-2xl font-bold underline">Statistics</h1>
 {/snippet}
 
 <style>
