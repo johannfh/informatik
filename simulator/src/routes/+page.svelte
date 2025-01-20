@@ -11,6 +11,7 @@
     import { type AnimalOption } from "$lib/types";
     import { screenHeight, screenWidth } from "$lib/constants";
     import { Chicken, Fox, Sheep, Wolf } from "$lib";
+    import { settings } from "$src/lib/settings";
 
     let gameCanvas: HTMLCanvasElement;
 
@@ -19,8 +20,9 @@
             width: screenWidth,
             height: screenHeight,
             canvasElement: gameCanvas,
+            backgroundColor: new ex.Color(20, 200, 40),
             scenes: {
-                start: MainScene,
+                start: new MainScene(settings),
             },
         });
 
@@ -62,8 +64,9 @@
 </script>
 
 <div class="w-screen h-screen flex flex-row">
-    <div class="p-4 flex flex-col gap-4">
+    <div class="p-4 flex flex-col gap-4 bg-gray-50 shadow-2xl">
         {@render gameControls()}
+        {@render gameSettings()}
         <!-- {@render gameStats()} -->
     </div>
     <div class="flex items-center justify-center flex-grow">
@@ -72,6 +75,16 @@
         </div>
     </div>
 </div>
+
+{#snippet gameSettings()}
+    <div>
+        <h1 class="text-2xl font-bold underline">Settings</h1>
+        <div class="flex flex-row gap-2 items-center">
+            <h2 class="text-xl">Auto Spawn</h2>
+            <input type="checkbox" name="autoSpawn" bind:checked={$settings.autoSpawn}>
+        </div>
+    </div>
+{/snippet}
 
 {#snippet gameControls()}
     <div class="flex flex-col gap-2">
@@ -111,6 +124,7 @@
         }
 
         > li.unimplemented {
+            display: none;
         }
     }
 </style>

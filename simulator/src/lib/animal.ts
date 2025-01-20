@@ -36,9 +36,11 @@ export abstract class Animal extends ex.Actor {
         this.pos = this.pos.add(direction.scale(this.speed * deltatime));
 
         this.movementLogic(deltatime);
+        this.hunger(elapsedMs);
     }
 
     public abstract movementLogic(deltatime: number): void;
+    public abstract hunger(elapsedMs: number): void;
 
     public wander(wanderDistance: number) {
         this.targetPosition = this.pos.add(

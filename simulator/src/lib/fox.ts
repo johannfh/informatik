@@ -3,6 +3,8 @@ import { Resources } from "./resources";
 import type { ActorGetter } from "./types";
 import { Animal, type AnimalArgs } from "./animal";
 import { Chicken } from "./chicken";
+import { FOX_COOLDOWN, FOX_SATURATION } from "./constants";
+import { closestActorTo } from "./utils";
 
 export type FoxArgs = {
     actorGetter: ActorGetter;
@@ -11,6 +13,8 @@ export type FoxArgs = {
 export class Fox extends Animal {
     private sprite: ex.Sprite;
     private actorGetter: ActorGetter;
+    private saturation = FOX_SATURATION;
+    cooldown: number = 0;
 
     constructor(params: FoxArgs) {
         super(params);
@@ -28,6 +32,11 @@ export class Fox extends Animal {
         this.graphics.add(this.sprite);
     }
 
+    override onPostUpdate(e: ex.Engine, elapsedMs: number): void {
+        super.onPostUpdate(e, elapsedMs);
+        this.cooldown -= elapsedMs;
+    }
+
     override onCollisionStart(
         self: ex.Collider,
         other: ex.Collider,
@@ -35,8 +44,9 @@ export class Fox extends Animal {
         contact: ex.CollisionContact,
     ): void {
         super.onCollisionStart(self, other, side, contact);
-        if (other.owner instanceof Chicken) {
+        if (other.owner instanceof Chicken && this.cooldown < 0) {
             other.owner.kill();
+            this.saturation = FOX_SATURATION;
         }
     }
 
@@ -46,25 +56,15 @@ export class Fox extends Animal {
 
     private getClosestPrey(actorGetter: ActorGetter): Animal | undefined {
         const prey = this.getPrey(actorGetter);
-
         if (prey.length === 0) return undefined;
+        return closestActorTo(this.pos, prey)
+    }
 
-        // initialize the closestEnemy object
-        let closestPrey = {
-            distance: this.pos.distance(prey[0].pos),
-            actor: prey[0],
-        };
-
-        // calculate the actual closestEnemy
-        for (const actor of prey) {
-            let distance = actor.pos.distance(this.pos);
-
-            if (distance < closestPrey.distance) {
-                closestPrey = { distance, actor };
-            }
+    override hunger(elapsedMs: number) {
+        if (this.cooldown < 0) this.saturation -= elapsedMs;
+        if (this.saturation < 0) {
+            this.kill();
         }
-
-        return closestPrey.actor;
     }
 
     override movementLogic(deltatime: number) {

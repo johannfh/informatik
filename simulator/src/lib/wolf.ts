@@ -1,9 +1,10 @@
 import * as ex from "excalibur";
 import { Animal, type AnimalArgs } from "./animal";
-import { Chicken } from "./chicken";
 import { Resources } from "./resources";
 import type { ActorGetter } from "./types";
 import { Sheep } from "./sheep";
+import { closestActorTo } from "./utils";
+import { WOLF_SATURATION } from "./constants";
 
 export type WolfArgs = {
     actorGetter: ActorGetter;
@@ -12,6 +13,8 @@ export type WolfArgs = {
 export class Wolf extends Animal {
     private actorGetter: ActorGetter;
     sprite: ex.Sprite;
+    cooldown: number;
+    saturation: number;
 
     constructor(args: WolfArgs) {
         super(args);
@@ -20,12 +23,19 @@ export class Wolf extends Animal {
         sprite.scale = sprite.scale.normalize();
         sprite.scale.x /= 5;
         sprite.scale.y /= 5;
+        this.cooldown = 0;
+        this.saturation = WOLF_SATURATION;
     }
 
     override onInitialize(engine: ex.Engine) {
         super.onInitialize(engine);
 
         this.graphics.add(this.sprite);
+    }
+
+    override onPostUpdate(e: ex.Engine, elapsedMs: number): void {
+        super.onPostUpdate(e, elapsedMs);
+        this.cooldown -= elapsedMs;
     }
 
     override onCollisionStart(
@@ -35,8 +45,16 @@ export class Wolf extends Animal {
         contact: ex.CollisionContact,
     ): void {
         super.onCollisionStart(self, other, side, contact);
-        if (other.owner instanceof Sheep) {
+        if (other.owner instanceof Sheep && this.cooldown < 0) {
             other.owner.kill();
+            this.cooldown = 3000;
+        }
+    }
+
+    override hunger(elapsedMs: number): void {
+        if (this.cooldown < 0) this.saturation -= elapsedMs;
+        if (this.saturation < 0) {
+            this.kill()
         }
     }
 
@@ -46,25 +64,8 @@ export class Wolf extends Animal {
 
     private getClosestPrey(actorGetter: ActorGetter): Animal | undefined {
         const prey = this.getPrey(actorGetter);
-
         if (prey.length === 0) return undefined;
-
-        // initialize the closestEnemy object
-        let closestPrey = {
-            distance: this.pos.distance(prey[0].pos),
-            actor: prey[0],
-        };
-
-        // calculate the actual closestEnemy
-        for (const actor of prey) {
-            let distance = actor.pos.distance(this.pos);
-
-            if (distance < closestPrey.distance) {
-                closestPrey = { distance, actor };
-            }
-        }
-
-        return closestPrey.actor;
+        return closestActorTo(this.pos, prey)
     }
 
     public movementLogic(deltatime: number): void {
@@ -74,7 +75,7 @@ export class Wolf extends Animal {
 
         const prey = this.getClosestPrey(this.actorGetter);
 
-        if (!prey) {
+        if (!prey || this.cooldown > 0) {
             this.wander(50);
             return;
         }
@@ -87,7 +88,7 @@ export class Wolf extends Animal {
                 .sub(this.pos)
                 .normalize()
                 // randomize direction to prey
-                .rotate(((Math.random() - 0.5) * Math.PI) / 1.5)
+                .rotate(((Math.random() - 0.5) * Math.PI) / 3)
                 // scale walk distance by attack distance
                 .scale(attackDistance),
         );

@@ -38,6 +38,10 @@ export class Sheep extends Animal {
         return closestActorTo(this.pos, predators);
     }
 
+    override hunger(elapsedMs: number): void {
+        // Sheep = Food
+    }
+
     public movementLogic(deltatime: number): void {
         if (this.pos.distance(this.targetPosition) > 1) {
             return;
@@ -45,7 +49,7 @@ export class Sheep extends Animal {
 
         let predator = this.getClosestPredator(this.actorGetter);
 
-        if (!predator) {
+        if (!predator || this.pos.distance(predator.pos) > 100) {
             this.wander(50);
             return;
         }

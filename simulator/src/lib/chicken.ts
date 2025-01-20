@@ -38,6 +38,10 @@ export class Chicken extends Animal {
         return closestActorTo(this.pos, predators);
     }
 
+    override hunger(elapsedMs: number): void {
+        // Chicken = Food
+    }
+
     public movementLogic(deltatime: number): void {
         if (this.pos.distance(this.targetPosition) > 1) {
             return;
