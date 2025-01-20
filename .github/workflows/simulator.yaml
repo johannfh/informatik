@@ -21,7 +21,8 @@ jobs:
           pnpm install
           pnpm run build
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-pages-artifact@v3
+        id: deployment
         with:
           name: simulator
           path: simulator/build
@@ -29,15 +30,13 @@ jobs:
   deploy-gh-pages:
     runs-on: ubuntu-22.04
     needs: build-artifact
-    permissions:
-      pages: write
-      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
-        id: simulator
+        id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: simulator
           
 
   
