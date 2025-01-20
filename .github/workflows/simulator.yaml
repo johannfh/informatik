@@ -34,7 +34,7 @@ jobs:
       id-token: write
       pages: write
     environment:
-      name: github-pages
+      name: simulator
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
