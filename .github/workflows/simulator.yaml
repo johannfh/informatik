@@ -28,6 +28,7 @@ jobs:
 
   deploy-gh-pages:
     runs-on: ubuntu-22.04
+    needs: build-artifact
     steps:
       - name: Deploy to Github Pages`
         run: echo "TODO!"
