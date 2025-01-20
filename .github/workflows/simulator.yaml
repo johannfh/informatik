@@ -30,6 +30,9 @@ jobs:
   deploy-gh-pages:
     runs-on: ubuntu-22.04
     needs: build-artifact
+    permissions:
+      id-token: write
+      pages: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
